@@ -63,6 +63,9 @@ class App extends Component {
 
   render() {
     const { todos, username } = this.props;
+    if(!username) {
+      return <p>Login to view todos.</p>
+    }
 
     return (
       <>
