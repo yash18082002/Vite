@@ -4,25 +4,25 @@ import axios from "axios";
 const TODOS_URL = 'http://localhost:3000/todos';
 
 export const fetchTodos = createAsyncThunk('todos/fetchTodos', async () => {
-    const response = await axios.get(TODOS_URL);
+    const response = await axios.get(TODOS_URL, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
     return response.data;
 })
 
 export const addTodos = createAsyncThunk('todos/addTodos', async (initialTodo) => {
-    const response = await axios.post(TODOS_URL, initialTodo);
+    const response = await axios.post(TODOS_URL, initialTodo, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
     return response.data;
 })
 
 export const doTodos = createAsyncThunk('todos/doTodos', async (initialTodo) => {
     const { _id } = initialTodo;
-    const response = await axios.put(`${TODOS_URL}/${_id}`);
+    const response = await axios.put(`${TODOS_URL}/${_id}`, 1,{ headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
     if (response?.status === 200) return initialTodo;
     return `${response?.status}: ${response?.statusText}`;
 })
 
 export const deleteTodos = createAsyncThunk('todos/deleteTodos', async (initialTodo) => {
     const { _id } = initialTodo;
-    const response = await axios.delete(`${TODOS_URL}/${_id}`);
+    const response = await axios.delete(`${TODOS_URL}/${_id}`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
     if (response?.status === 200) return initialTodo;
     return `${response?.status}: ${response?.statusText}`;
 })

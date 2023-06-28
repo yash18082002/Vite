@@ -1,33 +1,50 @@
 import React, { Component } from 'react';
 import './App.css';
+import { Button, Modal, Form, Input } from 'antd';
 import TodoTask from './TodoTask';
 import { connect } from 'react-redux';
 import { selectAllTodos, fetchTodos, addTodos, selectTodosStatus } from './features/todos/todosSlice';
+import { signup, login, selectUsername } from './features/user/userSlice';
 
 class App extends Component {
   constructor(props) {
     super(props);
-    this.formRef = React.createRef();
     this.state = {
       title: '',
-      description: ''
+      description: '',
+      isModalOpen: false
     };
   }
 
-  handleAdd = (e) => {
+  handleAdd = (values) => {
+    const { title, description } = values;
+    const todo = {
+      title,
+      description
+    };
+    this.props.addTodos(todo);
+    //this.setState({ title: '', description: '' });
+    this.setState({ isModalOpen: false });
+  }
+
+  showModal = () => {
+    this.setState({ isModalOpen: true });
+  };
+
+  handleCancel = () => {
+    this.setState({ isModalOpen: false });
+  };
+
+  handleLogin = (e) => {
     e.preventDefault();
-    const { title, description } = this.state;
-    if (this.formRef.current.checkValidity()) {
-      const todo = {
-        title,
-        description
-      };
-      this.props.addTodos(todo);
-      this.setState({ title: '', description: '' });
-    } else {
-      e.stopPropagation();
-      this.formRef.current.classList.add('was-validated');
-    }
+    const userLogin = {
+      user: {
+        username: 'yash',
+        password: 'yash1234',
+        email: 'yash@email.com'
+      }
+    };
+    this.props.login(userLogin);
   }
 
   handleTitle = (e) => {
@@ -45,11 +62,80 @@ class App extends Component {
   }
 
   render() {
-    const { todos } = this.props;
+    const { todos, username } = this.props;
 
     return (
       <>
-        <div className='container my-3'>
+        <div className="site-layout-content" style={{ background: '#ffffff' }}>
+          {todos.map((todo) => (
+            <TodoTask
+              title={todo.title}
+              _id={todo._id}
+              key={todo._id}
+              description={todo.description}
+              completed={todo.completed}
+            />
+          ))}
+          {username && <Button onClick={this.showModal} type='primary' style={{ margin: '16px' }}>Add Todo</Button>}
+          <Modal title="Basic Modal" open={this.state.isModalOpen} onOk={this.handleCancel} onCancel={this.handleCancel}>
+            <Form
+              name="basic"
+              labelCol={{
+                span: 8,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              style={{
+                maxWidth: 600,
+              }}
+              // initialValues={{
+              //   remember: true,
+              // }}
+              onFinish={this.handleAdd}
+              // onFinishFailed={onFinishFailed}
+              autoComplete="off"
+            >
+              <Form.Item
+                label="Title"
+                name="title"
+                rules={[
+                  {
+                    required: true,
+                    message: 'Please input Todo title!',
+                  },
+                ]}
+              >
+                <Input />
+              </Form.Item>
+
+              <Form.Item
+                label="Description"
+                name="description"
+                rules={[
+                  {
+                    required: true,
+                    message: 'Please input Todo description!',
+                  },
+                ]}
+              >
+                <Input />
+              </Form.Item>
+
+              <Form.Item
+                wrapperCol={{
+                  offset: 8,
+                  span: 16,
+                }}
+              >
+                <Button type="primary" htmlType="submit">
+                  Submit
+                </Button>
+              </Form.Item>
+            </Form>
+          </Modal>
+        </div>
+        {/* <div className='container my-3'>
           <h1>Todos</h1>
           <form
             action="/todos"
@@ -57,7 +143,7 @@ class App extends Component {
             className="needs-validation"
             noValidate
             method="POST"
-            onSubmit={this.handleAdd}
+            onSubmit={this.handleLogin}
           >
             <div className="mb-3">
               <label className="form-label" htmlFor="title">Title</label>
@@ -98,7 +184,7 @@ class App extends Component {
               completed={todo.completed}
             />
           ))}
-        </div>
+        </div> */}
       </>
     );
   }
@@ -107,11 +193,14 @@ class App extends Component {
 const mapStateToProps = (state) => ({
   todos: selectAllTodos(state),
   todosStatus: selectTodosStatus(state),
+  username: selectUsername(state)
 });
 
 const mapDispatchToProps = {
   fetchTodos,
   addTodos,
+  signup,
+  login,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
